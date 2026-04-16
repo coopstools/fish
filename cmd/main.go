@@ -13,7 +13,7 @@ func main() {
 	layout.InitPrint()
 	for {
 		layout.Print()
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 		layout.Update()
 	}
 }
