@@ -1,13 +1,15 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/coopstools/fish/internal"
 )
 
 func main() {
-	layout := internal.Open("./example/0_around.fish")
+	app := os.Args[1]
+	layout := internal.Open(app)
 	layout.InitPrint()
 	for {
 		layout.Print()

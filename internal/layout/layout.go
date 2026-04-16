@@ -39,7 +39,8 @@ type Layout struct {
 	//negative means terminate
 	direction int
 
-	stack stack
+	stack   stackContainer
+	printer printer
 }
 
 func (l *Layout) InitPrint() {
@@ -57,7 +58,7 @@ func (l *Layout) Print() {
 	fmt.Printf("%s%s%c", l.lastPos(), RESET, lastChar)
 
 	curChar := l.program[l.ypos][l.xpos]
-	fmt.Printf("%s%s%c", l.curPos(), HIGHLIGHT, curChar)
+	fmt.Printf("%s%s%c%s", l.curPos(), HIGHLIGHT, curChar, RESET)
 	fmt.Print(l.endPos())
 }
 
@@ -150,6 +151,26 @@ func (l *Layout) runCommand() {
 		l.stack.rm()
 	case '$':
 		l.stack.swap()
+	case '@':
+		l.stack.shift3R()
+	case '}':
+		l.stack.shiftR()
+	case '{':
+		l.stack.shiftL()
+	case 'r':
+		l.stack.reverse()
+	case 'l':
+		l.stack.length()
+	case '[':
+		l.stack.substack()
+	case ']':
+		l.stack.restack()
+	case '&':
+		l.stack.reg()
+	case 'n':
+		l.printer.printN(l.stack.pop())
+	case 'o':
+		l.printer.print(rune(l.stack.pop()))
 	default:
 		if c >= '0' && c <= '9' {
 			l.stack.push(int(c - '0'))
@@ -191,7 +212,7 @@ func (l *Layout) scan() {
 
 func (l *Layout) mov() {
 	if l.direction == -1 {
-		fmt.Println("Program exited properly")
+		l.printer.terminate()
 		os.Exit(0)
 	}
 	dir := l.direction & 0x3
@@ -221,8 +242,11 @@ func New(programLines []string) *Layout {
 	}
 
 	return &Layout{
-		program:   programLines,
-		mode:      STD_MODE,
+		program: programLines,
+		mode:    STD_MODE,
+		stack: stackContainer{
+			base: &stack{values: []int{}},
+		},
 		direction: -1,
 	}
 }
